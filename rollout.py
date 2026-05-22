@@ -66,7 +66,6 @@ def run_rollout(model_xml, policy: Policy, scenario: RolloutScenario, config: Ro
 
     # initialize the control policy for this specific MuJoCo model/state
     policy.initialize(model, data)
-    print("policy.K:", policy.K)
 
     if config.render:
         rollout_context = viewer.launch_passive(model, data)
