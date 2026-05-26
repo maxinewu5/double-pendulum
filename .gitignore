@@ -3,7 +3,7 @@ __pycache__
 !outputs_example/validate/*.csv
 *.png
 !docs/**/*.png
-!outputs_example/validate/*.png
+!outputs_example/**/*.png
 *.txt
 .DS_Store
 !requirements.txt
