@@ -20,10 +20,6 @@ from model import MJCF_MODEL
 from policy import LQRPolicy
 
 def main() -> int:
-    # policy = LQRPolicy(
-    #     Q=np.diag([50.0, 10.0, 10.0, 5.0, 2.0, 2.0]), 
-    #     R=np.array([[20.0]])
-    # )
     policy = LQRPolicy(
         Q=np.diag([8.5, 10.0, 10.0, 4.5, 1.5, 1.0]),
         R=np.array([[1.0]])
