@@ -1,4 +1,7 @@
 __pycache__
 *.csv
+!outputs_example/validate/*.csv
 *.png
+!docs/**/*.png
+!outputs_example/validate/*.png
 *.txt
