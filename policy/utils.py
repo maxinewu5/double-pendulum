@@ -38,6 +38,88 @@ def interpret_planar_state(state: np.ndarray) -> dict[str, float]:
     }
 
 
+def analyze_capture_region_dwell(
+    states: np.ndarray,
+    reference_state: np.ndarray | None = None,
+    *,
+    q1_error_limit_rad: float,
+    q2_abs_error_limit_rad: float,
+    q1_dot_limit: float,
+    q2_abs_dot_limit: float,
+    dt: float,
+) -> dict[str, float | int | bool]:
+    """
+    Measure how often and how long a trajectory stays in a near-upright capture
+    region defined by angle and velocity thresholds.
+    """
+    if reference_state is None:
+        reference_state = np.zeros(states.shape[1], dtype=float)
+    interpreted_reference = interpret_planar_state(reference_state)
+
+    total_frames_in_region = 0
+    longest_streak_frames = 0
+    current_streak_frames = 0
+    first_entry_index = -1
+    best_index = 0
+    best_normalized_score = float("inf")
+
+    for idx, state in enumerate(states):
+        interpreted = interpret_planar_state(state)
+        q1_error_abs = abs(wrap_angle_error(interpreted["q1"], interpreted_reference["q1"]))
+        q2_abs_error_abs = abs(wrap_angle_error(interpreted["q2_abs"], interpreted_reference["q2_abs"]))
+        q1_dot_abs = abs(interpreted["q1_dot"])
+        q2_abs_dot_abs = abs(interpreted["q2_abs_dot"])
+
+        normalized_score = (
+            q1_error_abs / q1_error_limit_rad
+            + q2_abs_error_abs / q2_abs_error_limit_rad
+            + q1_dot_abs / q1_dot_limit
+            + q2_abs_dot_abs / q2_abs_dot_limit
+        )
+        if normalized_score < best_normalized_score:
+            best_normalized_score = normalized_score
+            best_index = idx
+
+        in_region = (
+            q1_error_abs <= q1_error_limit_rad
+            and q2_abs_error_abs <= q2_abs_error_limit_rad
+            and q1_dot_abs <= q1_dot_limit
+            and q2_abs_dot_abs <= q2_abs_dot_limit
+        )
+
+        if in_region:
+            total_frames_in_region += 1
+            current_streak_frames += 1
+            if first_entry_index < 0:
+                first_entry_index = idx
+            longest_streak_frames = max(longest_streak_frames, current_streak_frames)
+        else:
+            current_streak_frames = 0
+
+    best_state = interpret_planar_state(states[best_index])
+    best_q1_error_abs = abs(wrap_angle_error(best_state["q1"], interpreted_reference["q1"]))
+    best_q2_abs_error_abs = abs(wrap_angle_error(best_state["q2_abs"], interpreted_reference["q2_abs"]))
+    best_q1_dot_abs = abs(best_state["q1_dot"])
+    best_q2_abs_dot_abs = abs(best_state["q2_abs_dot"])
+
+    return {
+        "entered_region": first_entry_index >= 0,
+        "first_entry_index": first_entry_index,
+        "first_entry_time_s": -1.0 if first_entry_index < 0 else first_entry_index * dt,
+        "total_frames_in_region": total_frames_in_region,
+        "total_time_in_region_s": total_frames_in_region * dt,
+        "longest_streak_frames": longest_streak_frames,
+        "longest_streak_time_s": longest_streak_frames * dt,
+        "best_index": best_index,
+        "best_time_s": best_index * dt,
+        "best_q1_error_rad": best_q1_error_abs,
+        "best_q2_abs_error_rad": best_q2_abs_error_abs,
+        "best_q1_dot_abs": best_q1_dot_abs,
+        "best_q2_abs_dot_abs": best_q2_abs_dot_abs,
+        "best_normalized_score": best_normalized_score,
+    }
+
+
 def compute_lqr_gain_at_reference(
     model,
     data,
