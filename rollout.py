@@ -130,12 +130,15 @@ def run_rollout(model_xml, policy: Policy, scenario: RolloutScenario, config: Ro
 
             # log step and control data as needed
             if config.logging: 
-                if step % 50 == 0:
+                if step % 10 == 0:
                     print(
                         f"step {step}: "
+                        f"t={step * model.opt.timestep: .4f}, "
                         f"x={data.qpos[0]: .4f}, "
                         f"theta1={data.qpos[1]: .4f}, "
                         f"theta2={data.qpos[2]: .4f}, "
+                        f"theta1dot={data.qvel[1]: .4f}, "
+                        f"theta2dot={data.qvel[2]: .4f}, "
                         f"u={data.ctrl[0]: .4f}"
                     )
 
