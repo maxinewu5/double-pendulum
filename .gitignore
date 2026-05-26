@@ -5,3 +5,4 @@ __pycache__
 !docs/**/*.png
 !outputs_example/validate/*.png
 *.txt
+.DS_Store
