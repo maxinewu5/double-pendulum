@@ -2,7 +2,7 @@
 
 ## Documentation
 
-See [docs/report.md](/Users/maxin/Documents/GitHub/tesla/double-pendulum/docs/report.md) for the project writeup and results discussion.
+See [docs/report.md](https://github.com/maxinewu5/double-pendulum/blob/main/docs/report.md) for the project writeup and results discussion.
 
 ## Setup
 
