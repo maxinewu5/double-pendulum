@@ -228,93 +228,46 @@ def _build_post_handoff_plot(
 
 
 def main() -> int:
-    # swingup_policy = SwingUpPolicy(
-    #     control_limit=30.0,
-    #     initial_kick_force=15.0,
-    #     initial_kick_duration_s=0.5,
-    #     x_target=0.5,
-    #     brake_margin=0.3,
-    #     launch_force=20.0,
-    #     brake_force=17.0,
-    # )
-    # swingup_policy = SwingUpPolicy(
-    #     control_limit=30.0,
-    #     initial_kick_force=15.0,
-    #     initial_kick_duration_s=0.5,
-    #     x_target=0.5,
-    #     brake_margin=0.5,
-    #     launch_force=16.0,
-    #     brake_force=17.0,
-    # )
-
-    # swingup_policy = SwingUpPolicy(
-    #     control_limit=30.0,
-    #     initial_kick_force=15.0, # dang switching to -15.0 cooks everything
-    #     initial_kick_duration_s=0.5,
-    #     x_target=0.4,
-    #     brake_margin=0.5,
-    #     launch_force=18.0,
-    #     brake_force=15.0,
-    #     apex_velocity_threshold=0.4
-    # )
-
-    # after the second grid search!1
+    # tuned swing up policy
     swingup_policy = SwingUpPolicy(
         control_limit=30.0,
-        initial_kick_force=14.75, # dang switching to -15.0 cooks everything
-        initial_kick_duration_s=0.5125,
+        initial_kick_force=15.0,
+        initial_kick_duration_s=0.5,
         x_target=0.4,
-        brake_margin=0.51,
+        brake_margin=0.5,
         launch_force=18.0,
         brake_force=15.0,
-        apex_velocity_threshold=0.4
+        apex_velocity_threshold=0.2,
+        hold_kd=8.0,
     )
 
-    # this was the roughly tuned numbers that exactly made stuff work
-    # Q = np.diag([
-    #     8.5,   # cart position
-    #     10.0,   # q1
-    #     10.0,   # q2_rel
-    #     4.5,   # cart velocity
-    #     1.5,   # q1_dot
-    #     1.0,   # q2_rel_dot
-    # ])
-    # R = np.array([[1.0]])
-
+    # tuned lqr parameters
     Q = np.diag([
-        4.5,   # cart position
-        5.0,   # q1
-        5.0,   # q2_rel
-        2.5,   # cart velocity
-        0.5,   # q1_dot
-        0.5,   # q2_rel_dot
+        8.5,   # cart position
+        10.0,   # q1
+        10.0,   # q2_rel
+        4.5,   # cart velocity
+        1.5,   # q1_dot
+        1.0,   # q2_rel_dot
     ])
-    R = np.array([[0.6]])
+    R = np.array([[1.0]])
 
-    # Q = np.diag([
-    #     0.005,   # cart position
-    #     0.005,   # q1
-    #     0.0001,   # q2_rel
-    #     0.005,   # cart velocity
-    #     0.0001,   # q1_dot
-    #     0.0001,   # q2_rel_dot
-    # ])
-    # R = np.array([[0.01]])
     lqr_policy = LQRPolicy(
         Q=Q,
         R=R,
         control_limit=60.0,
         reference_state=np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0]),
     )
+
     policy = SwingUpLQRPolicy(
         swingup_policy=swingup_policy,
         lqr_policy=lqr_policy,
         q1_capture_deg=5.0,
         q2_capture_deg=5.0,
-        q1_dot_capture=1.5,
-        q2_abs_dot_capture=1.5,
+        q1_dot_capture=2.0,
+        q2_abs_dot_capture=2.0,
         x_capture_limit=2.0,
-        h_lim=6,
+        h_lim=2,
     )
 
     metrics = run_rollout(
@@ -322,9 +275,7 @@ def main() -> int:
         policy=policy,
         scenario=RolloutScenario(
             init_qpos=np.array([0.0, np.deg2rad(180), np.deg2rad(0.0)]),
-            # init_qpos=np.array([0.0, np.deg2rad(180), np.deg2rad(-0.3)]),
-            # init_qvel=np.array([0.0, 0.0, 0.0]),
-            init_qvel=np.array([0.0, 0.0, 0.1]),
+            init_qvel=np.array([0.0, 0.0, 0.0]),
             name="swingup_lqr",
         ),
         config=RolloutConfig(render=True, logging=True),
