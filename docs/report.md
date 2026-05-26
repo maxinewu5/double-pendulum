@@ -7,10 +7,6 @@ The goal of this project was to control a cart-mounted double pendulum in simula
 
 The plant was modeled in MuJoCo as a planar cart-double-pendulum system consisting of a sliding cart, two pendulum links, and a single motor actuator applying horizontal force to the cart. The cart moves along a bounded rail, and each pendulum link is connected by a hinge joint. 
 
-![MuJoCo simulation environment for the cart-double-pendulum system.](assets/mujoco_sim.png)
-
-*Figure 1. MuJoCo simulation environment used for controller development and rollout visualization.*
-
 The system state was defined as follows:
 
 $$
