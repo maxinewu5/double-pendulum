@@ -20,16 +20,20 @@ from model import MJCF_MODEL
 from policy import LQRPolicy
 
 def main() -> int:
+    # policy = LQRPolicy(
+    #     Q=np.diag([50.0, 10.0, 10.0, 5.0, 2.0, 2.0]), 
+    #     R=np.array([[20.0]])
+    # )
     policy = LQRPolicy(
-        Q=np.diag([50.0, 10.0, 10.0, 5.0, 2.0, 2.0]), 
-        R=np.array([[20.0]])
+        Q=np.diag([8.5, 10.0, 10.0, 4.5, 1.5, 1.0]),
+        R=np.array([[1.0]])
     )
     run_rollout(
         model_xml=MJCF_MODEL,
         policy=policy,  # LQR policy will be computed inside the rollout function
         scenario=RolloutScenario(
             # change the initial angles and velocities to be further from the upright position
-            init_qpos=np.array([0.0, np.deg2rad(10), np.deg2rad(-10)]),
+            init_qpos=np.array([0.0, np.deg2rad(-12), np.deg2rad(-6)]),
             init_qvel=np.array([0.0, 0.0, 0.0]),
             name="lqr",
         ),
