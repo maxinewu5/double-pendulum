@@ -8,6 +8,7 @@ from dataclasses import dataclass
 import time
 import numpy as np
 from policy import Policy
+from sensor import SensorModel
 
 try:
     import mujoco
@@ -33,6 +34,8 @@ class RolloutConfig:
     angular_velocity_tolerance: float = 0.1
     settle_hold_time: float = 1.0
     stop_early: bool = False
+    sensor_noise_std: np.ndarray | None = None
+    sensor_noise_seed: int | None = None
 
 
 def run_rollout(model_xml, policy: Policy, scenario: RolloutScenario, config: RolloutConfig | None = None):
@@ -63,6 +66,12 @@ def run_rollout(model_xml, policy: Policy, scenario: RolloutScenario, config: Ro
     state_history = []
     max_angle_error = 0.0
     peak_cart_displacement = 0.0
+    measured_state_history = []
+
+    sensor = SensorModel(
+        noise_std=config.sensor_noise_std,
+        seed=config.sensor_noise_seed,
+    )
 
     # initialize the control policy for this specific MuJoCo model/state
     policy.initialize(model, data)
@@ -95,7 +104,9 @@ def run_rollout(model_xml, policy: Policy, scenario: RolloutScenario, config: Ro
             # x: the full state vector of the system
             # x = [cart_pos, theta1, theta2, cart_vel, theta1_vel, theta2_vel]
             x = np.concatenate([data.qpos.copy(), data.qvel.copy()])
+            measured_x = sensor.measure(x)
             state_history.append(x)
+            measured_state_history.append(measured_x)
             max_angle_error = max(max_angle_error, abs(x[1]), abs(x[2]))
             peak_cart_displacement = max(peak_cart_displacement, abs(x[0]))
 
@@ -120,7 +131,7 @@ def run_rollout(model_xml, policy: Policy, scenario: RolloutScenario, config: Ro
                 first_settled_step = None
 
             # ask the active control policy for the input to apply at this state
-            u = np.asarray(policy.compute_control(x), dtype=float).reshape(-1)
+            u = np.asarray(policy.compute_control(measured_x), dtype=float).reshape(-1)
             data.ctrl[:] = u
             mujoco.mj_step(model, data)
 
@@ -158,5 +169,6 @@ def run_rollout(model_xml, policy: Policy, scenario: RolloutScenario, config: Ro
         "peak_cart_displacement": peak_cart_displacement,
         "viewer_closed": not viewer_running,
         "state_history": state_history,
+        "measured_state_history": measured_state_history,
         "control_history": control_history,
     }
