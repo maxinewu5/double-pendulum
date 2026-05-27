@@ -182,5 +182,8 @@ If this project were extended, the most important next step would be to improve 
 - Adding a dedicated catch or damping phase before LQR handoff so that the pendulum enters the stabilization basin with lower residual velocity.
 - Testing robustness under additional perturbations such as nonzero cart offsets, model mismatch, and measurement noise.
 
+## Appendix
+Additional validation plots, supplementary rollout figures, and simulation details are provided in the appendix: [appendix.md](appendix.md).
+
 ## AI Usage
 I used Codex to assist with code implementation and to draft parts of the report. I reviewed and approved all code and written material included in the final submission.
