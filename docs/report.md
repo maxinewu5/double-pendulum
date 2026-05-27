@@ -87,31 +87,18 @@ At this anchor, the controller recovered 152 of 289 tested velocity combinations
 
 ## Swing-up + LQR
 
-<p align="center">
-  <video controls width="70%">
-    <source src="assets/swingup_lqr.mp4" type="video/mp4">
-    Your browser does not support the video tag.
-  </video>
-</p>
-
-*Figure 5. Nominal swing-up and balance rollout.*
+[Swing-up + LQR Rollout Video](assets/swingup_lqr.mp4)
 
 The end-to-end controller combined the swing-up controller with LQR stabilization near upright. In nominal runs, this pipeline succeeded: the swing-up controller built momentum from rest, brought the pendulum near the upright region, and transferred control to the LQR stabilizer, which then settled the motion.
 
 The main challenge was not simply reaching upright, but reaching it with sufficiently low angular velocity for a smooth handoff. In many runs, the swing-up policy brought the pendulum close to upright in angle, but the state still carried too much momentum. As a result, the handoff to LQR was often aggressive, requiring large initial control effort, and small differences in timing or incoming momentum could qualitatively change the outcome.
 
-<table align="center" style="border-collapse: collapse; border: none;">
-  <tr style="border: none;">
-    <td align="center" width="50%" style="border: none; padding: 0 8px;">
-      <img src="../outputs_example/swingup_lqr/swingup_lqr_debug.png" alt="Debug plot for the nominal swing-up plus LQR rollout." width="95%">
-    </td>
-    <td align="center" width="50%" style="border: none; padding: 0 8px;">
-      <img src="../outputs_example/swingup_lqr/swingup_lqr_post_handoff.png" alt="Post-handoff view of the nominal swing-up plus LQR rollout." width="95%">
-    </td>
-  </tr>
-</table>
+<div style="display: flex; justify-content: center; gap: 12px; align-items: flex-start;">
+  <img src="../outputs_example/swingup_lqr/swingup_lqr_debug.png" alt="Debug plot for the nominal swing-up plus LQR rollout." width="48%">
+  <img src="../outputs_example/swingup_lqr/swingup_lqr_post_handoff.png" alt="Post-handoff view of the nominal swing-up plus LQR rollout." width="48%">
+</div>
 
-*Figure 6. End-to-end and post-handoff views of the nominal swing-up plus LQR rollout.*
+*Figure 5. End-to-end and post-handoff views of the nominal swing-up plus LQR rollout.*
 
 These results suggest that the handoff between the swing-up controller and the local stabilization is critical. Near upright, the LQR controller had a broad local angle basin but a more limited velocity basin, so the swing-up stage needs to consistently produce a sufficiently low velocity state to handoff to the stabilization controller.
 
